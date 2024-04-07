@@ -18,6 +18,24 @@ const (
 	AuthAssumeRoleEnvVar = "TERRATEST_IAM_ROLE" // OS environment variable name through which Assume Role ARN may be passed for authentication
 )
 
+var baseAWSConfig *aws.Config
+var baseAWSConfigIsSet bool = false
+
+func SetBaseAWSConfig(config *aws.Config) {
+	baseAWSConfig = config
+	baseAWSConfigIsSet = true
+}
+
+func NewAWSConfig() (config *aws.Config) {
+	if baseAWSConfigIsSet {
+		newConfig := &baseAWSConfig
+		config = *newConfig
+	} else {
+		config = aws.NewConfig()
+	}
+	return
+}
+
 // NewAuthenticatedSession creates an AWS session following to standard AWS authentication workflow.
 // If AuthAssumeIamRoleEnvVar environment variable is set, assumes IAM role specified in it.
 func NewAuthenticatedSession(region string) (*session.Session, error) {
@@ -30,7 +48,7 @@ func NewAuthenticatedSession(region string) (*session.Session, error) {
 
 // NewAuthenticatedSessionFromDefaultCredentials gets an AWS Session, checking that the user has credentials properly configured in their environment.
 func NewAuthenticatedSessionFromDefaultCredentials(region string) (*session.Session, error) {
-	awsConfig := aws.NewConfig().WithRegion(region)
+	awsConfig := NewAWSConfig().WithRegion(region)
 
 	sessionOptions := session.Options{
 		Config:            *awsConfig,
