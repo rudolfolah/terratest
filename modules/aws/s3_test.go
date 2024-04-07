@@ -3,6 +3,7 @@ package aws
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -86,6 +87,13 @@ func TestEmptyS3Bucket(t *testing.T) {
 	CreateS3Bucket(t, region, s3BucketName)
 	defer DeleteS3Bucket(t, region, s3BucketName)
 
+	resolver := endpoints.ResolverFunc(func(service, region string, opts ...func(*endpoints.Options)) (endpoints.ResolvedEndpoint, error) {
+		return endpoints.ResolvedEndpoint{
+			URL:           "http://localhost:4566",
+			SigningRegion: "custom-signing-region",
+		}, nil
+	})
+	SetBaseAWSConfig(aws.NewConfig().WithEndpointResolver(resolver).WithCredentials(CreateAwsCredentials("access-key", "secret")))
 	s3Client, err := NewS3ClientE(t, region)
 	if err != nil {
 		t.Fatal(err)
