@@ -86,7 +86,7 @@ func NewAuthenticatedSessionFromRole(region string, roleARN string) (*session.Se
 // CreateAwsSessionFromRole returns a new AWS session after assuming the role
 // whose ARN is provided in roleARN.
 func CreateAwsSessionFromRole(region string, roleARN string) (*session.Session, error) {
-	sess, err := session.NewSession(aws.NewConfig().WithRegion(region))
+	sess, err := session.NewSession(NewAWSConfig().WithRegion(region))
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func AssumeRole(sess *session.Session, roleARN string) *session.Session {
 // create an AWS session authenticated as the new IAM User.
 func CreateAwsSessionWithCreds(region string, accessKeyID string, secretAccessKey string) (*session.Session, error) {
 	creds := CreateAwsCredentials(accessKeyID, secretAccessKey)
-	return session.NewSession(aws.NewConfig().WithRegion(region).WithCredentials(creds))
+	return session.NewSession(NewAWSConfig().WithRegion(region).WithCredentials(creds))
 }
 
 // CreateAwsSessionWithMfa creates a new AWS session authenticated using an MFA token retrieved using the given STS client and MFA Device.
@@ -128,7 +128,7 @@ func CreateAwsSessionWithMfa(region string, stsClient *sts.STS, mfaDevice *iam.V
 	sessionToken := *output.Credentials.SessionToken
 
 	creds := CreateAwsCredentialsWithSessionToken(accessKeyID, secretAccessKey, sessionToken)
-	return session.NewSession(aws.NewConfig().WithRegion(region).WithCredentials(creds))
+	return session.NewSession(NewAWSConfig().WithRegion(region).WithCredentials(creds))
 }
 
 // CreateAwsCredentials creates an AWS Credentials configuration with specific AWS credentials.
